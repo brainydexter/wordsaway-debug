@@ -9,6 +9,51 @@ public class ReadPlayerPrefs : MonoBehaviour {
 	#region Button Click handlers
 	public void ReadPreferences()
 	{
+		AppendResult (LoadBoardsStatus());
+	}
+
+	public void Email()
+	{
+		var email = "fly2priyank@gmail.com";
+		var subject = MyEscapeURL("debug report for wordsaway");
+		var body = MyEscapeURL (LoadInitialStats() + "\n\n" + LoadBoardsStatus ());
+		Application.OpenURL ("mailto:" + email + "?subject=" + subject + "&body=" + body);
+	}
+
+	string MyEscapeURL (string url) 
+	{
+		return WWW.EscapeURL(url).Replace("+","%20");
+	}
+	#endregion
+
+	#region Mono Methods
+	void Start()
+	{
+		AppendResult (LoadInitialStats ());
+	}
+	#endregion
+
+	#region Stats methods
+
+	private string LoadInitialStats()
+	{
+		var strBuilder = new StringBuilder ();
+
+		bool previousRun = PlayerPrefs.HasKey (Constants.Persist.PREVIOUS_RUN);
+		if (!previousRun) {
+			AppendError( "Game has never been installed before. ");
+			return "Game has never been installed before.";
+		} else
+			strBuilder.AppendLine ("Game has been installed on this device. ");
+
+		strBuilder.AppendLine ("Version: " + ReadF (Constants.Persist.VERSION));
+		strBuilder.AppendLine ("Current Board: " + ReadI (Constants.Persist.CURRENT_BOARD_ID));
+
+		return strBuilder.ToString ();
+	}
+
+	private string LoadBoardsStatus()
+	{
 		var strBuilder = new StringBuilder ();
 		strBuilder.AppendLine ("Boards Status:");
 		// read board info
@@ -18,28 +63,9 @@ public class ReadPlayerPrefs : MonoBehaviour {
 			strBuilder.AppendFormat ("Board {0}: {1}\n", boardId, boardStatus);	
 		}
 
-		AppendResult (strBuilder.ToString ());
+		return strBuilder.ToString ();
 	}
 
-	#endregion
-
-	#region Mono Methods
-	void Start()
-	{
-		var strBuilder = new StringBuilder ();
-
-		bool previousRun = PlayerPrefs.HasKey (Constants.Persist.PREVIOUS_RUN);
-		if (!previousRun) {
-			AppendError( "Game has never been installed before. ");
-			return;
-		} else
-			strBuilder.AppendLine ("Game has been installed on this device. ");
-
-		strBuilder.AppendLine ("Version: " + ReadF (Constants.Persist.VERSION));
-		strBuilder.AppendLine ("Current Board: " + ReadI (Constants.Persist.CURRENT_BOARD_ID));
-
-		AppendResult (strBuilder.ToString ());
-	}
 	#endregion
 
 	#region Utility Methods
